@@ -130,3 +130,4 @@ iOSInjectionProject/
 
 # Claude Code
 .claude/cache/
+# Note: CLAUDE.md and .claude/commands/ should be committed
