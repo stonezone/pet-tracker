@@ -30,7 +30,7 @@ import CoreLocation
 /// // Decode from received data
 /// let received = try JSONDecoder().decode(LocationFix.self, from: json)
 /// ```
-public struct LocationFix: Codable, Equatable, Sendable, Identifiable {
+public struct LocationFix: Codable, Sendable, Identifiable {
 
     // MARK: - Core Properties
 
@@ -378,3 +378,31 @@ extension LocationFix {
     }
 }
 #endif
+
+// MARK: - Equatable
+
+extension LocationFix: Equatable {
+    /// Custom equality comparison with tolerance for floating point values
+    ///
+    /// Compares all fields with appropriate tolerance:
+    /// - Timestamps: 1 millisecond tolerance (due to JSON encoding/decoding precision)
+    /// - Coordinates: Exact comparison (degrees are precise)
+    /// - Doubles: 0.0001 tolerance for accuracy/speed/course values
+    public static func == (lhs: LocationFix, rhs: LocationFix) -> Bool {
+        // Timestamp comparison with 1ms tolerance
+        let timestampEqual = abs(lhs.timestamp.timeIntervalSince(rhs.timestamp)) < 0.001
+
+        return lhs.id == rhs.id &&
+               timestampEqual &&
+               lhs.source == rhs.source &&
+               lhs.coordinate == rhs.coordinate &&
+               lhs.altitudeMeters == rhs.altitudeMeters &&
+               lhs.horizontalAccuracyMeters == rhs.horizontalAccuracyMeters &&
+               lhs.verticalAccuracyMeters == rhs.verticalAccuracyMeters &&
+               lhs.speedMetersPerSecond == rhs.speedMetersPerSecond &&
+               lhs.courseDegrees == rhs.courseDegrees &&
+               lhs.headingDegrees == rhs.headingDegrees &&
+               lhs.batteryFraction == rhs.batteryFraction &&
+               lhs.sequence == rhs.sequence
+    }
+}
