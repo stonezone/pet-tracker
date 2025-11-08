@@ -138,27 +138,42 @@ public final class PetLocationManager: NSObject {
 
     /// Starts tracking both pet (via Watch) and owner (via iPhone GPS)
     public func startTracking() async {
+        print("PetLocationManager: Starting tracking...")
+
+        // Wait for WCSession to activate if needed
+        if session.activationState != .activated {
+            print("PetLocationManager: Waiting for WCSession activation...")
+            // Give session a moment to activate
+            try? await Task.sleep(for: .seconds(1))
+
+            if session.activationState != .activated {
+                lastError = WatchConnectivityError.sessionNotActivated
+                print("PetLocationManager: Session not activated after delay (state: \(session.activationState.rawValue))")
+                return
+            }
+        }
+
+        print("PetLocationManager: Session is activated")
+
         // Request location permissions if needed
         let status = locationManager.authorizationStatus
 
         switch status {
         case .notDetermined:
+            print("PetLocationManager: Requesting location authorization...")
             locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
+            print("PetLocationManager: Location permission denied")
             lastError = LocationError.permissionDenied
             return
         case .authorizedWhenInUse, .authorizedAlways:
+            print("PetLocationManager: Starting location updates...")
             locationManager.startUpdatingLocation()
         @unknown default:
             break
         }
 
-        // WatchConnectivity is already set up in init
-        // Just verify session is activated
-        guard session.activationState == .activated else {
-            lastError = WatchConnectivityError.sessionNotActivated
-            return
-        }
+        print("PetLocationManager: Tracking started successfully")
     }
 
     /// Stops tracking
@@ -307,6 +322,7 @@ extension PetLocationManager: WCSessionDelegate {
         _ session: WCSession,
         didReceiveMessage message: [String: Any]
     ) {
+        print("PetLocationManager: Received interactive message (no reply handler)")
         handleReceivedMessage(message)
     }
 
@@ -316,6 +332,7 @@ extension PetLocationManager: WCSessionDelegate {
         didReceiveMessage message: [String: Any],
         replyHandler: @escaping ([String: Any]) -> Void
     ) {
+        print("PetLocationManager: Received interactive message (with reply handler)")
         handleReceivedMessage(message)
         replyHandler(["status": "received"])
     }
@@ -325,6 +342,7 @@ extension PetLocationManager: WCSessionDelegate {
         _ session: WCSession,
         didReceiveApplicationContext applicationContext: [String: Any]
     ) {
+        print("PetLocationManager: Received application context")
         handleReceivedMessage(applicationContext)
     }
 

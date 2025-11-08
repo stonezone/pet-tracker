@@ -131,8 +131,10 @@ struct ContentView: View {
                     }
                 }
             }
-            .task {
-                await locationManager.startTracking()
+            .onAppear {
+                Task {
+                    await locationManager.startTracking()
+                }
             }
         }
     }
