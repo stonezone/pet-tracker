@@ -1,4 +1,4 @@
-# pawWatch - Project Setup Checklist
+# PetTracker - Project Setup Checklist
 
 **Last Updated**: 2025-11-07
 **Status**: Initial Setup Complete - Ready for Xcode Project Creation
@@ -10,7 +10,7 @@
 ### ✅ Completed Steps
 
 - [x] **Directory Structure** - Created clean architecture layout
-- [x] **Swift Package** - pawWatchPackage with pawWatchFeature module configured
+- [x] **Swift Package** - PetTrackerPackage with PetTrackerFeature module configured
 - [x] **Core Models** - LocationFix domain model with Codable/Sendable conformance
 - [x] **iOS Service** - PetLocationManager with @Observable pattern
 - [x] **Watch Service** - WatchLocationProvider with triple-path messaging
@@ -22,7 +22,7 @@
 
 ### 🔄 In Progress / Next Steps
 
-- [ ] **Xcode Workspace** - Create pawWatch.xcworkspace with iOS and Watch targets
+- [ ] **Xcode Workspace** - Create PetTracker.xcworkspace with iOS and Watch targets
 - [ ] **Xcode Projects** - Generate .xcodeproj files for app shells
 - [ ] **App Entitlements** - Configure WatchConnectivity, Location, HealthKit capabilities
 - [ ] **Build Configurations** - Set up Debug/Release xcconfig files
@@ -139,7 +139,7 @@
 
 ### Swift Packages
 
-- **pawWatchFeature** - All on-device, no external dependencies
+- **PetTrackerFeature** - All on-device, no external dependencies
   - ✅ Uses only Apple frameworks (CoreLocation, WatchConnectivity, HealthKit, SwiftUI)
   - ✅ No third-party dependencies (by design)
 

@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import CoreLocation
-@testable import pawWatchFeature
+@testable import PetTrackerFeature
 
 /// Comprehensive test suite for LocationFix data model
 ///

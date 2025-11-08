@@ -1,7 +1,7 @@
 import SwiftUI
-import pawWatchFeature
+import PetTrackerFeature
 
-/// Main content view for pawWatch iOS app
+/// Main content view for PetTracker iOS app
 ///
 /// Displays:
 /// - Pet location on map
@@ -121,7 +121,7 @@ struct ContentView: View {
 
                 Spacer()
             }
-            .navigationTitle("pawWatch")
+            .navigationTitle("PetTracker")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

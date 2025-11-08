@@ -1,4 +1,4 @@
-# pawWatch - Project Setup Documentation
+# PetTracker - Project Setup Documentation
 
 **Created**: 2025-11-07
 **Status**: Complete - Ready for Xcode Project File Generation
@@ -7,32 +7,32 @@
 
 ## Overview
 
-This document describes the complete project setup for pawWatch, including directory structure, build configurations, and integration with the Swift Package Manager.
+This document describes the complete project setup for PetTracker, including directory structure, build configurations, and integration with the Swift Package Manager.
 
 ## Project Structure
 
 ```
-pawWatch/
-├── pawWatch.xcworkspace/          # Xcode workspace (created)
-├── pawWatchPackage/                # Swift Package with all logic
+PetTracker/
+├── PetTracker.xcworkspace/          # Xcode workspace (created)
+├── PetTrackerPackage/                # Swift Package with all logic
 │   ├── Package.swift
-│   ├── Sources/pawWatchFeature/
+│   ├── Sources/PetTrackerFeature/
 │   │   ├── Models/
 │   │   │   └── LocationFix.swift
 │   │   ├── Services/
 │   │   │   ├── PetLocationManager.swift
 │   │   │   └── WatchLocationProvider.swift
 │   │   └── Views/                  # (Pending - can add shared views here)
-│   └── Tests/pawWatchFeatureTests/
+│   └── Tests/PetTrackerFeatureTests/
 │       └── LocationFixTests.swift
-├── pawWatch/                       # iOS app target (shell)
-│   ├── pawWatchApp.swift          # @main entry point
+├── PetTracker/                       # iOS app target (shell)
+│   ├── PetTrackerApp.swift          # @main entry point
 │   ├── ContentView.swift          # Main iOS UI
 │   ├── Info.plist                 # iOS capabilities
-│   ├── pawWatch.entitlements      # App Groups, Location
+│   ├── PetTracker.entitlements      # App Groups, Location
 │   └── Assets.xcassets/           # App icons, colors
-├── pawWatch Watch App Extension/  # Watch app target
-│   ├── pawWatchApp.swift          # @main entry point
+├── PetTracker Watch App Extension/  # Watch app target
+│   ├── PetTrackerApp.swift          # @main entry point
 │   ├── WatchContentView.swift     # Main Watch UI
 │   ├── Info.plist                 # Watch capabilities
 │   └── *.entitlements             # App Groups, HealthKit, Location
@@ -47,7 +47,7 @@ pawWatch/
 
 ### 1. Swift Package First
 
-All application logic lives in the Swift Package (`pawWatchPackage`). This provides:
+All application logic lives in the Swift Package (`PetTrackerPackage`). This provides:
 
 - **Modularity**: Clear separation of concerns
 - **Testability**: Easy to test without app targets
@@ -58,7 +58,7 @@ All application logic lives in the Swift Package (`pawWatchPackage`). This provi
 
 The iOS and Watch app targets are minimal shells that:
 
-- Import `pawWatchFeature` package
+- Import `PetTrackerFeature` package
 - Define app entry point (`@main`)
 - Configure capabilities (Location, HealthKit, WatchConnectivity)
 - Provide platform-specific assets
@@ -115,8 +115,8 @@ Build settings are centralized in `.xcconfig` files:
 
 ### iOS App
 
-**Entitlements** (`pawWatch.entitlements`):
-- App Groups: `group.com.pawwatch` (for Watch sync)
+**Entitlements** (`PetTracker.entitlements`):
+- App Groups: `group.com.pettracker` (for Watch sync)
 
 **Info.plist Permissions**:
 - Location When In Use: Distance calculation
@@ -125,8 +125,8 @@ Build settings are centralized in `.xcconfig` files:
 
 ### Watch App
 
-**Entitlements** (`pawWatch Watch App Extension.entitlements`):
-- App Groups: `group.com.pawwatch`
+**Entitlements** (`PetTracker Watch App Extension.entitlements`):
+- App Groups: `group.com.pettracker`
 - HealthKit: Workout sessions
 - HealthKit Background Delivery: GPS while backgrounded
 
@@ -175,7 +175,7 @@ WATCHOS_DEPLOYMENT_TARGET = 11.0
 The app targets import the Swift Package via:
 
 ```swift
-import pawWatchFeature
+import PetTrackerFeature
 ```
 
 This gives access to:
@@ -187,7 +187,7 @@ This gives access to:
 
 ```swift
 @main
-struct pawWatchApp: App {
+struct PetTrackerApp: App {
     @State private var locationManager = PetLocationManager()
 
     var body: some Scene {
@@ -208,7 +208,7 @@ Views access via:
 
 ```swift
 @main
-struct pawWatch_Watch_App: App {
+struct PetTracker_Watch_App: App {
     @State private var locationProvider = WatchLocationProvider()
 
     var body: some Scene {
@@ -238,7 +238,7 @@ In Xcode:
 1. Select project in navigator
 2. Go to "Frameworks, Libraries, and Embedded Content"
 3. Click "+" and select "Add Local..."
-4. Choose `pawWatchPackage` directory
+4. Choose `PetTrackerPackage` directory
 5. Ensure "Embed & Sign" is selected
 
 ### 3. Configure Build Settings
@@ -253,14 +253,14 @@ In Xcode:
 Build both targets for simulator:
 ```bash
 # iOS app
-xcodebuild -workspace pawWatch.xcworkspace \
-  -scheme pawWatch \
+xcodebuild -workspace PetTracker.xcworkspace \
+  -scheme PetTracker \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
   build
 
 # Watch app
-xcodebuild -workspace pawWatch.xcworkspace \
-  -scheme "pawWatch Watch App" \
+xcodebuild -workspace PetTracker.xcworkspace \
+  -scheme "PetTracker Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (46mm)' \
   build
 ```
@@ -270,8 +270,8 @@ xcodebuild -workspace pawWatch.xcworkspace \
 Once Xcode project is set up:
 ```bash
 xcodebuild test \
-  -workspace pawWatch.xcworkspace \
-  -scheme pawWatch \
+  -workspace PetTracker.xcworkspace \
+  -scheme PetTracker \
   -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
@@ -291,16 +291,16 @@ See `CLAUDE.md` for details on the Xcode 26.1 bug requiring separate Watch app i
 
 ### Created Files
 
-- [x] `pawWatch.xcworkspace` - Workspace container
-- [x] `pawWatch/pawWatchApp.swift` - iOS app entry
-- [x] `pawWatch/ContentView.swift` - iOS main view
-- [x] `pawWatch/Info.plist` - iOS capabilities
-- [x] `pawWatch/pawWatch.entitlements` - iOS entitlements
-- [x] `pawWatch/Assets.xcassets/` - iOS asset catalog
-- [x] `pawWatch Watch App Extension/pawWatchApp.swift` - Watch entry
-- [x] `pawWatch Watch App Extension/WatchContentView.swift` - Watch view
-- [x] `pawWatch Watch App Extension/Info.plist` - Watch capabilities
-- [x] `pawWatch Watch App Extension/*.entitlements` - Watch entitlements
+- [x] `PetTracker.xcworkspace` - Workspace container
+- [x] `PetTracker/PetTrackerApp.swift` - iOS app entry
+- [x] `PetTracker/ContentView.swift` - iOS main view
+- [x] `PetTracker/Info.plist` - iOS capabilities
+- [x] `PetTracker/PetTracker.entitlements` - iOS entitlements
+- [x] `PetTracker/Assets.xcassets/` - iOS asset catalog
+- [x] `PetTracker Watch App Extension/PetTrackerApp.swift` - Watch entry
+- [x] `PetTracker Watch App Extension/WatchContentView.swift` - Watch view
+- [x] `PetTracker Watch App Extension/Info.plist` - Watch capabilities
+- [x] `PetTracker Watch App Extension/*.entitlements` - Watch entitlements
 - [x] `Config/Shared.xcconfig` - Shared build settings
 - [x] `Config/Debug.xcconfig` - Debug configuration
 - [x] `Config/Release.xcconfig` - Release configuration

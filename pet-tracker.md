@@ -1,10 +1,10 @@
-# pawWatch Pet Tracker - Project Specification
+# PetTracker Pet Tracker - Project Specification
 
 ## Project Basics
 
 ### 1. What type of project is this?
 
-**pawWatch** is a native iOS and watchOS companion application pair that transforms an Apple Watch into a real-time GPS tracker for pets. The Apple Watch is attached to a pet's collar to capture GPS coordinates, which are wirelessly transmitted to the owner's iPhone for live monitoring, distance calculation, and historical trail visualization.
+**PetTracker** is a native iOS and watchOS companion application pair that transforms an Apple Watch into a real-time GPS tracker for pets. The Apple Watch is attached to a pet's collar to capture GPS coordinates, which are wirelessly transmitted to the owner's iPhone for live monitoring, distance calculation, and historical trail visualization.
 
 **Project Type**: iOS/watchOS Companion App
 **Architecture**: Workspace + Swift Package Manager
@@ -44,7 +44,7 @@
 
 ### Core Components
 
-#### 1. Watch App (`pawWatch Watch App Extension`)
+#### 1. Watch App (`PetTracker Watch App Extension`)
 
 **Purpose**: GPS capture and transmission to iPhone
 
@@ -76,7 +76,7 @@
    - Used when phone not reachable
    - Queued for offline periods
 
-#### 2. iOS App (`pawWatchPackage/Sources/pawWatchFeature`)
+#### 2. iOS App (`PetTrackerPackage/Sources/PetTrackerFeature`)
 
 **Purpose**: Receive GPS data, calculate distance, display location and trail
 
@@ -249,7 +249,7 @@ This project adapts patterns from the **GPS Relay Framework** (`/Users/zackjorda
 
 ### Key Differences from Reference
 
-| Feature | GPS Relay Framework | pawWatch |
+| Feature | GPS Relay Framework | PetTracker |
 |---------|---------------------|----------|
 | **Swift Version** | Swift 6.0 | Swift 6.2.1 |
 | **iOS Version** | iOS 18.0+ | iOS 26.0+ |
@@ -264,33 +264,33 @@ This project adapts patterns from the **GPS Relay Framework** (`/Users/zackjorda
 ### Project Structure
 
 ```
-pawWatch-app/
+PetTracker-app/
 ├── Config/                         # XCConfig build settings
 │   ├── Debug.xcconfig
 │   ├── Release.xcconfig
 │   ├── Shared.xcconfig
-│   └── pawWatch.entitlements      # App capabilities
-├── pawWatch.xcworkspace/           # Workspace container
-├── pawWatch.xcodeproj/             # App shell (minimal)
-├── pawWatch/                       # iOS app target
+│   └── PetTracker.entitlements      # App capabilities
+├── PetTracker.xcworkspace/           # Workspace container
+├── PetTracker.xcodeproj/             # App shell (minimal)
+├── PetTracker/                       # iOS app target
 │   ├── Assets.xcassets/
-│   └── pawWatchApp.swift          # @main entry point
-├── pawWatch Watch App/             # Watch container
+│   └── PetTrackerApp.swift          # @main entry point
+├── PetTracker Watch App/             # Watch container
 │   └── Info.plist                 # WKApplication=true
-├── pawWatch Watch App Extension/   # Watch extension
+├── PetTracker Watch App Extension/   # Watch extension
 │   ├── Info.plist                 # NSExtension config
-│   ├── pawWatchApp.swift          # Watch @main
+│   ├── PetTrackerApp.swift          # Watch @main
 │   ├── WatchLocationProvider.swift
 │   └── ContentView.swift
-└── pawWatchPackage/                # All features and logic
+└── PetTrackerPackage/                # All features and logic
     ├── Package.swift
     ├── Sources/
-    │   └── pawWatchFeature/
+    │   └── PetTrackerFeature/
     │       ├── PetLocationManager.swift
     │       ├── LocationFix.swift
     │       └── [SwiftUI Views]
     └── Tests/
-        └── pawWatchFeatureTests/
+        └── PetTrackerFeatureTests/
 ```
 
 ### Build and Test (XcodeBuildMCP)
@@ -299,31 +299,31 @@ pawWatch-app/
 
 ```javascript
 // Discover projects
-discover_projs({ workspaceRoot: "/path/to/pawWatch-app" })
+discover_projs({ workspaceRoot: "/path/to/PetTracker-app" })
 
 // List schemes
-list_schemes({ workspacePath: "/path/to/pawWatch.xcworkspace" })
+list_schemes({ workspacePath: "/path/to/PetTracker.xcworkspace" })
 
 // Build iOS app for simulator
 build_run_sim({
-    workspacePath: "/path/to/pawWatch.xcworkspace",
-    scheme: "pawWatch",
+    workspacePath: "/path/to/PetTracker.xcworkspace",
+    scheme: "PetTracker",
     simulatorName: "iPhone 16"
 })
 
 // Build Watch app for physical device
 build_device({
-    workspacePath: "/path/to/pawWatch.xcworkspace",
-    scheme: "pawWatch Watch App",
+    workspacePath: "/path/to/PetTracker.xcworkspace",
+    scheme: "PetTracker Watch App",
     deviceId: "WATCH_UUID"
 })
 
 // Install on devices (separate installation workaround)
-install_app_device({ deviceId: "IPHONE_UUID", appPath: "pawWatch.app" })
-install_app_device({ deviceId: "WATCH_UUID", appPath: "pawWatch Watch App.app" })
+install_app_device({ deviceId: "IPHONE_UUID", appPath: "PetTracker.app" })
+install_app_device({ deviceId: "WATCH_UUID", appPath: "PetTracker Watch App.app" })
 
 // Run tests
-swift_package_test({ packagePath: "/path/to/pawWatchPackage" })
+swift_package_test({ packagePath: "/path/to/PetTrackerPackage" })
 ```
 
 ## Key Technologies
@@ -359,7 +359,7 @@ swift_package_test({ packagePath: "/path/to/pawWatchPackage" })
 
 ```swift
 import Testing
-import pawWatchFeature
+import PetTrackerFeature
 
 @Test func locationFixEncodesCorrectly() async throws {
     let fix = LocationFix(

@@ -43,9 +43,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>pawWatch needs your location to calculate the distance between you and your pet.</string>
+	<string>PetTracker needs your location to calculate the distance between you and your pet.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>pawWatch needs your location to calculate the distance between you and your pet, even when the app is in the background.</string>
+	<string>PetTracker needs your location to calculate the distance between you and your pet, even when the app is in the background.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

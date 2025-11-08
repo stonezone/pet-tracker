@@ -23,13 +23,13 @@
 	<key>WKExtensionDelegateClassName</key>
 	<string>$(PRODUCT_MODULE_NAME).ExtensionDelegate</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>pawWatch needs location access to track your pet's GPS position.</string>
+	<string>PetTracker needs location access to track your pet's GPS position.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>pawWatch needs continuous location access to track your pet's GPS position while attached to their collar.</string>
+	<string>PetTracker needs continuous location access to track your pet's GPS position while attached to their collar.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>pawWatch uses HealthKit workout sessions to enable extended GPS tracking on Apple Watch.</string>
+	<string>PetTracker uses HealthKit workout sessions to enable extended GPS tracking on Apple Watch.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>pawWatch uses HealthKit workout sessions to enable extended GPS tracking on Apple Watch.</string>
+	<string>PetTracker uses HealthKit workout sessions to enable extended GPS tracking on Apple Watch.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

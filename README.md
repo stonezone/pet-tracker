@@ -1,4 +1,4 @@
-# pawWatch - Pet GPS Tracker
+# PetTracker - Pet GPS Tracker
 
 Transform your Apple Watch into a real-time GPS tracker for your pet. Simply attach the Watch to your pet's collar and monitor their location live on your iPhone.
 
@@ -10,7 +10,7 @@ Transform your Apple Watch into a real-time GPS tracker for your pet. Simply att
 
 ## Overview
 
-**pawWatch** is a native iOS/watchOS companion app that provides real-time pet location tracking without cloud services or subscriptions. All processing happens on-device for maximum privacy and reliability.
+**PetTracker** is a native iOS/watchOS companion app that provides real-time pet location tracking without cloud services or subscriptions. All processing happens on-device for maximum privacy and reliability.
 
 ### Key Features
 
@@ -60,13 +60,13 @@ git clone <repository-url>
 cd pet-tracker
 
 # 2. Open workspace
-open pawWatch.xcworkspace
+open PetTracker.xcworkspace
 
 # 3. Run tests (Swift package)
 swift test
 
 # 4. Build for simulator (iOS)
-# Select pawWatch scheme and iPhone 16 simulator in Xcode, then press Run
+# Select PetTracker scheme and iPhone 16 simulator in Xcode, then press Run
 
 # 5. Build for physical devices
 # See docs/architecture/watchapp2-bug-workaround.md for Xcode 26.1 installation workaround
@@ -80,14 +80,14 @@ Xcode 26.1 has a critical bug that prevents normal Watch app installation. A wor
 
 ## Architecture
 
-pawWatch follows **Clean Architecture** principles with clear separation of concerns:
+PetTracker follows **Clean Architecture** principles with clear separation of concerns:
 
 ### Module Structure
 
 ```
-pawWatch/
-├── pawWatchPackage/              # Swift Package (all logic)
-│   ├── Sources/pawWatchFeature/
+PetTracker/
+├── PetTrackerPackage/              # Swift Package (all logic)
+│   ├── Sources/PetTrackerFeature/
 │   │   ├── Models/               # Domain layer
 │   │   │   └── LocationFix.swift # GPS data model
 │   │   ├── Services/             # Application layer
@@ -95,10 +95,10 @@ pawWatch/
 │   │   │   └── WatchLocationProvider.swift  (watchOS)
 │   │   └── Views/                # Presentation layer
 │   │       └── (SwiftUI views - pending)
-│   └── Tests/pawWatchFeatureTests/
+│   └── Tests/PetTrackerFeatureTests/
 │       └── LocationFixTests.swift
-├── pawWatch/                      # iOS app shell
-├── pawWatch Watch App Extension/  # Watch app shell
+├── PetTracker/                      # iOS app shell
+├── PetTracker Watch App Extension/  # Watch app shell
 └── Config/                        # Build configurations
 ```
 
@@ -195,7 +195,7 @@ git commit -m "test: add PetLocationManager tests"
 ### ✅ Completed
 
 - [x] Project structure and architecture
-- [x] Swift Package with pawWatchFeature module
+- [x] Swift Package with PetTrackerFeature module
 - [x] LocationFix domain model (fully tested)
 - [x] PetLocationManager (@Observable iOS coordinator)
 - [x] WatchLocationProvider (triple-path Watch GPS)
@@ -257,7 +257,7 @@ This project adapts patterns from the **GPS Relay Framework**:
 
 ### Key Differences
 
-| Aspect | GPS Relay | pawWatch |
+| Aspect | GPS Relay | PetTracker |
 |--------|-----------|----------|
 | External relay | WebSocket server | None (on-device only) |
 | Data streams | Remote + Base + Fused | Pet + Owner |

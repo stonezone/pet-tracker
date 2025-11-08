@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "pawWatchPackage",
+    name: "PetTrackerPackage",
     platforms: [
         .iOS(.v18),      // Will be updated to iOS 26 when creating Xcode project
         .watchOS(.v11)   // Will be updated to watchOS 26 when creating Xcode project
@@ -12,8 +12,8 @@ let package = Package(
     products: [
         // Main feature module containing all app logic
         .library(
-            name: "pawWatchFeature",
-            targets: ["pawWatchFeature"]
+            name: "PetTrackerFeature",
+            targets: ["PetTrackerFeature"]
         ),
     ],
     dependencies: [
@@ -22,7 +22,7 @@ let package = Package(
     targets: [
         // Main feature target
         .target(
-            name: "pawWatchFeature",
+            name: "PetTrackerFeature",
             dependencies: [],
             swiftSettings: [
                 // Enable strict concurrency checking
@@ -37,8 +37,8 @@ let package = Package(
 
         // Test target
         .testTarget(
-            name: "pawWatchFeatureTests",
-            dependencies: ["pawWatchFeature"],
+            name: "PetTrackerFeatureTests",
+            dependencies: ["PetTrackerFeature"],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency"),
             ]

@@ -1,12 +1,12 @@
 import SwiftUI
-import pawWatchFeature
+import PetTrackerFeature
 
-/// Main entry point for pawWatch Watch app
+/// Main entry point for PetTracker Watch app
 ///
-/// This is a minimal shell that imports the pawWatchFeature package
+/// This is a minimal shell that imports the PetTrackerFeature package
 /// and sets up the WatchKit app structure.
 @main
-struct pawWatch_Watch_App: App {
+struct PetTracker_Watch_App: App {
 
     /// Location provider instance for Watch GPS tracking
     @State private var locationProvider = WatchLocationProvider()

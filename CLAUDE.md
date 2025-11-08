@@ -1,4 +1,4 @@
-# pawWatch - Claude Development Guidelines
+# PetTracker - Claude Development Guidelines
 
 **Last Updated**: 2025-11-07
 **Project**: Pet GPS Tracker (iOS/watchOS Companion App)
@@ -33,7 +33,7 @@
 
 ## Project Mission
 
-**pawWatch** transforms an Apple Watch into a real-time GPS tracker for pets. The Watch captures GPS coordinates while attached to a pet's collar and wirelessly transmits location data to the owner's iPhone for live monitoring, distance calculation, and trail visualization.
+**PetTracker** transforms an Apple Watch into a real-time GPS tracker for pets. The Watch captures GPS coordinates while attached to a pet's collar and wirelessly transmits location data to the owner's iPhone for live monitoring, distance calculation, and trail visualization.
 
 **Core Value**: On-device pet tracking without cloud services or subscriptions.
 
@@ -87,15 +87,15 @@ This project follows **Clean Architecture** with clear separation of concerns:
 
 ## Module Structure
 
-### pawWatchPackage (Swift Package)
+### PetTrackerPackage (Swift Package)
 
 All application logic lives in the Swift Package:
 
 ```
-pawWatchPackage/
+PetTrackerPackage/
 ├── Package.swift
 ├── Sources/
-│   └── pawWatchFeature/
+│   └── PetTrackerFeature/
 │       ├── Models/
 │       │   └── LocationFix.swift           # Domain model
 │       ├── Services/
@@ -108,7 +108,7 @@ pawWatchPackage/
 │               ├── LocationDetailView.swift
 │               └── BatteryIndicatorView.swift
 └── Tests/
-    └── pawWatchFeatureTests/
+    └── PetTrackerFeatureTests/
         ├── LocationFixTests.swift
         ├── PetLocationManagerTests.swift
         └── WatchLocationProviderTests.swift
@@ -117,11 +117,11 @@ pawWatchPackage/
 ### App Targets (Minimal)
 
 ```
-pawWatch/                      # iOS app shell
-└── pawWatchApp.swift         # @main entry (imports pawWatchFeature)
+PetTracker/                      # iOS app shell
+└── PetTrackerApp.swift         # @main entry (imports PetTrackerFeature)
 
-pawWatch Watch App Extension/  # Watch extension
-└── pawWatchApp.swift         # @main entry (imports pawWatchFeature)
+PetTracker Watch App Extension/  # Watch extension
+└── PetTrackerApp.swift         # @main entry (imports PetTrackerFeature)
 ```
 
 **Targets contain ONLY**:
@@ -254,20 +254,20 @@ swift-format lint --recursive Sources/
 
 ```bash
 # Build iOS app for simulator
-xcodebuild -workspace pawWatch.xcworkspace \
-  -scheme pawWatch \
+xcodebuild -workspace PetTracker.xcworkspace \
+  -scheme PetTracker \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
   build
 
 # Build Watch app for physical device (workaround)
-xcodebuild -workspace pawWatch.xcworkspace \
-  -scheme "pawWatch Watch App" \
+xcodebuild -workspace PetTracker.xcworkspace \
+  -scheme "PetTracker Watch App" \
   -destination 'platform=watchOS,id=WATCH_UUID' \
   build
 
 # Install separately (not App Store compatible until Xcode fix)
-xcrun simctl install booted pawWatch.app
-xcrun devicectl device install app --device WATCH_UUID pawWatch\ Watch\ App.app
+xcrun simctl install booted PetTracker.app
+xcrun devicectl device install app --device WATCH_UUID PetTracker\ Watch\ App.app
 ```
 
 ---
@@ -390,7 +390,7 @@ func updateUI() {
 swift test
 
 # Run specific test suite
-swift test --filter pawWatchFeatureTests
+swift test --filter PetTrackerFeatureTests
 
 # Run tests with coverage
 swift test --enable-code-coverage
@@ -409,13 +409,13 @@ swift-format format --in-place --recursive Sources/
 
 ```bash
 # Open workspace
-open pawWatch.xcworkspace
+open PetTracker.xcworkspace
 
 # Build iOS app
-xcodebuild -workspace pawWatch.xcworkspace -scheme pawWatch build
+xcodebuild -workspace PetTracker.xcworkspace -scheme PetTracker build
 
 # Clean build
-xcodebuild clean -workspace pawWatch.xcworkspace -scheme pawWatch
+xcodebuild clean -workspace PetTracker.xcworkspace -scheme PetTracker
 ```
 
 ### Git
@@ -502,7 +502,7 @@ This project adapts patterns from:
 
 ### Key Differences
 
-| Aspect | GPS Relay Framework | pawWatch |
+| Aspect | GPS Relay Framework | PetTracker |
 |--------|---------------------|----------|
 | **External relay** | WebSocket to server | None (on-device only) |
 | **Data streams** | Remote + Base + Fused | Pet (Watch) + Owner (iPhone) |
@@ -541,7 +541,7 @@ MIInstallerErrorDomain error 143:
 
 ```swift
 import Testing
-@testable import pawWatchFeature
+@testable import PetTrackerFeature
 
 @Test("LocationFix encodes correctly")
 func testLocationFixEncoding() async throws {
@@ -619,7 +619,7 @@ func testDistanceCalculation() async throws {
 /verify-versions
 
 # 2. Open workspace
-open pawWatch.xcworkspace
+open PetTracker.xcworkspace
 
 # 3. Run tests
 swift test

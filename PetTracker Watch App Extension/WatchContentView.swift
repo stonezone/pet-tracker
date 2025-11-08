@@ -1,7 +1,7 @@
 import SwiftUI
-import pawWatchFeature
+import PetTrackerFeature
 
-/// Main content view for pawWatch Watch app
+/// Main content view for PetTracker Watch app
 ///
 /// Displays:
 /// - Tracking status

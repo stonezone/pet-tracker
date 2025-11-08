@@ -1,9 +1,9 @@
 // Shared build configuration for all targets
-// pawWatch iOS and watchOS apps
+// PetTracker iOS and watchOS apps
 
 // Product Settings
-PRODUCT_NAME = pawWatch
-PRODUCT_BUNDLE_IDENTIFIER = com.pawwatch.$(PRODUCT_NAME:rfc1034identifier)
+PRODUCT_NAME = PetTracker
+PRODUCT_BUNDLE_IDENTIFIER = com.pettracker.$(PRODUCT_NAME:rfc1034identifier)
 
 // Swift Settings
 SWIFT_VERSION = 6.0
