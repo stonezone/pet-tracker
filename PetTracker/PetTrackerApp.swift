@@ -9,7 +9,14 @@ import PetTrackerFeature
 struct PetTrackerApp: App {
 
     /// Location manager instance (shared across views)
-    @State private var locationManager = PetLocationManager()
+    @State private var locationManager: PetLocationManager
+
+    init() {
+        print("PetTrackerApp: iOS app starting...")
+        let manager = PetLocationManager()
+        _locationManager = State(initialValue: manager)
+        print("PetTrackerApp: iOS app initialized")
+    }
 
     var body: some Scene {
         WindowGroup {

@@ -105,13 +105,20 @@ public final class PetLocationManager: NSObject {
 
     /// Creates a new pet location manager
     public override init() {
+        print("PetLocationManager: Initializing...")
+
         self.locationManager = CLLocationManager()
         self.session = WCSession.default
 
         super.init()
 
+        print("PetLocationManager: Setting up location manager...")
         setupLocationManager()
+
+        print("PetLocationManager: Setting up WatchConnectivity...")
         setupWatchConnectivity()
+
+        print("PetLocationManager: Initialization complete")
     }
 
     // MARK: - Setup

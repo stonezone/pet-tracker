@@ -13,6 +13,10 @@ struct ContentView: View {
 
     @Environment(PetLocationManager.self) private var locationManager
 
+    init() {
+        print("ContentView: Initializing...")
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
@@ -132,8 +136,11 @@ struct ContentView: View {
                 }
             }
             .onAppear {
+                print("ContentView: onAppear called")
                 Task {
+                    print("ContentView: Starting location tracking task...")
                     await locationManager.startTracking()
+                    print("ContentView: Location tracking task completed")
                 }
             }
         }
