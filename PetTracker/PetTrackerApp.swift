@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PetTrackerFeature
 import OSLog
 
@@ -13,10 +14,22 @@ struct PetTrackerApp: App {
     @State private var locationManager: PetLocationManager
 
     init() {
-        Logger.ui.info("iOS app starting")
+        Logger.ui.info("========================================")
+        Logger.ui.info("PetTracker iOS app starting")
+        Logger.ui.info("iOS Version: \(UIDevice.current.systemVersion)")
+        Logger.ui.info("Device Model: \(UIDevice.current.model)")
+        Logger.ui.info("========================================")
+
+        Logger.ui.debug("Creating PetLocationManager...")
         let manager = PetLocationManager()
+        Logger.ui.debug("PetLocationManager created successfully")
+
+        Logger.ui.debug("Initializing SwiftUI @State wrapper...")
         _locationManager = State(initialValue: manager)
-        Logger.ui.info("iOS app initialized")
+        Logger.ui.debug("@State wrapper initialized")
+
+        Logger.ui.info("✅ iOS app initialization COMPLETE")
+        Logger.ui.info("========================================")
     }
 
     var body: some Scene {

@@ -140,12 +140,50 @@ public final class PetLocationManager: NSObject {
 
     private func setupWatchConnectivity() {
         guard WCSession.isSupported() else {
+            Logger.connectivity.warning("WatchConnectivity not supported on this device")
             lastError = WatchConnectivityError.notSupported
             return
         }
 
+        Logger.connectivity.debug("Setting WCSession delegate")
         session.delegate = self
+
+        // CRITICAL: Defer activation to avoid blocking main thread during app init
+        // Session activation can take time on first launch
+        Logger.connectivity.debug("Deferring WCSession activation to avoid init blocking")
+        Task {
+            await activateSessionAsync()
+        }
+    }
+
+    /// Activates WCSession asynchronously with timeout protection
+    private func activateSessionAsync() async {
+        Logger.connectivity.info("Activating WCSession asynchronously")
+
+        // Activate the session (this is asynchronous internally)
         session.activate()
+
+        // Wait for activation with timeout protection (max 5 seconds)
+        let startTime = Date()
+        let timeout: TimeInterval = 5.0
+
+        while session.activationState != .activated {
+            let elapsed = Date().timeIntervalSince(startTime)
+
+            if elapsed > timeout {
+                Logger.connectivity.error("WCSession activation timeout after \(timeout)s: state=\(self.session.activationState.rawValue)")
+                await MainActor.run {
+                    self.lastError = WatchConnectivityError.activationTimeout
+                }
+                return
+            }
+
+            // Check every 100ms
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+
+        let elapsed = Date().timeIntervalSince(startTime)
+        Logger.connectivity.info("WCSession activated successfully: duration=\(String(format: "%.2f", elapsed))s, reachable=\(self.session.isReachable)")
     }
 
     // MARK: - Public API
@@ -162,7 +200,7 @@ public final class PetLocationManager: NSObject {
 
             if session.activationState != .activated {
                 lastError = WatchConnectivityError.sessionNotActivated
-                Logger.connectivity.error("Session not activated after delay", metadata: ["state": "\(session.activationState.rawValue)"])
+                Logger.connectivity.error("Session not activated after delay: state=\(self.session.activationState.rawValue)")
                 return
             }
         }
@@ -234,6 +272,7 @@ public final class PetLocationManager: NSObject {
     public enum WatchConnectivityError: LocalizedError {
         case notSupported
         case sessionNotActivated
+        case activationTimeout
 
         public var errorDescription: String? {
             switch self {
@@ -241,6 +280,8 @@ public final class PetLocationManager: NSObject {
                 return "WatchConnectivity is not supported on this device."
             case .sessionNotActivated:
                 return "WatchConnectivity session is not activated."
+            case .activationTimeout:
+                return "WatchConnectivity session activation timed out. Try restarting the app."
             }
         }
     }
@@ -296,16 +337,13 @@ extension PetLocationManager: WCSessionDelegate {
         error: (any Error)?
     ) {
         let isActivated = (activationState == .activated)
-        Logger.connectivity.info("Session activation complete", metadata: [
-            "state": "\(activationState.rawValue)",
-            "reachable": "\(session.isReachable)"
-        ])
+        Logger.connectivity.info("Session activation complete: state=\(activationState.rawValue), reachable=\(session.isReachable)")
         Task { @MainActor in
             self.isSessionActivated = isActivated
             self.isWatchReachable = session.isReachable
             if let error = error {
                 self.lastError = error
-                Logger.connectivity.error("Session activation failed", metadata: ["error": "\(error.localizedDescription)"])
+                Logger.connectivity.error("Session activation failed: \(error.localizedDescription)")
             }
         }
     }
@@ -326,7 +364,7 @@ extension PetLocationManager: WCSessionDelegate {
     #endif
 
     nonisolated public func sessionReachabilityDidChange(_ session: WCSession) {
-        Logger.connectivity.info("Reachability changed", metadata: ["isReachable": "\(session.isReachable)"])
+        Logger.connectivity.info("Reachability changed: isReachable=\(session.isReachable)")
         Task { @MainActor in
             self.isWatchReachable = session.isReachable
         }
@@ -389,14 +427,14 @@ extension PetLocationManager: WCSessionDelegate {
             // Decode LocationFix
             let fix = try JSONDecoder().decode(LocationFix.self, from: jsonData)
 
-            Logger.connectivity.debug("Received location fix", metadata: ["sequence": "\(fix.sequence)"])
+            Logger.connectivity.debug("Received location fix: sequence=\(fix.sequence)")
 
             // Update on main thread
             Task { @MainActor in
                 self.handleReceivedLocationFix(fix)
             }
         } catch {
-            Logger.connectivity.error("Failed to decode location fix", metadata: ["error": "\(error.localizedDescription)"])
+            Logger.connectivity.error("Failed to decode location fix: \(error.localizedDescription)")
             Task { @MainActor in
                 self.lastError = error
             }

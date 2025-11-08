@@ -9,7 +9,7 @@ import OSLog
 /// Logger.healthKit.error("Failed to start workout: \(error)")
 /// ```
 @available(iOS 14.0, watchOS 7.0, macOS 11.0, *)
-extension Logger {
+public extension Logger {
     private static let subsystem = "com.pettracker"
 
     /// Watch location and GPS tracking
@@ -70,7 +70,7 @@ extension Logger {
 
 /// Log level helpers for consistent formatting
 @available(iOS 14.0, watchOS 7.0, macOS 11.0, *)
-extension Logger {
+public extension Logger {
     /// Log critical error with context
     ///
     /// Use for unrecoverable errors that require immediate attention
