@@ -1,7 +1,9 @@
 import Foundation
+#if os(watchOS)
 import CoreLocation
-import WatchConnectivity
+@preconcurrency import WatchConnectivity
 import HealthKit
+import WatchKit
 import Observation
 
 /// Provides GPS location tracking on Apple Watch and transmits to paired iPhone
@@ -44,7 +46,7 @@ public final class WatchLocationProvider: NSObject {
     public private(set) var isPhoneReachable: Bool = false
 
     /// Last error encountered
-    public private(set) var lastError: Error?
+    public private(set) var lastError: (any Error)?
 
     /// Number of location fixes sent
     public private(set) var fixesSent: Int = 0
@@ -373,7 +375,7 @@ extension WatchLocationProvider: CLLocationManagerDelegate {
 
     nonisolated public func locationManager(
         _ manager: CLLocationManager,
-        didFailWithError error: Error
+        didFailWithError error: any Error
     ) {
         Task { @MainActor in
             self.lastError = error
@@ -398,7 +400,7 @@ extension WatchLocationProvider: WCSessionDelegate {
     nonisolated public func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
-        error: Error?
+        error: (any Error)?
     ) {
         Task { @MainActor in
             self.isPhoneReachable = session.isReachable
@@ -413,19 +415,16 @@ extension WatchLocationProvider: WCSessionDelegate {
             self.isPhoneReachable = session.isReachable
         }
     }
+    
+    // Note: sessionDidBecomeInactive and sessionDidDeactivate are iOS-only
+    // Not needed on watchOS
 }
 
 // MARK: - WKInterfaceDevice Extension
 
 extension WKInterfaceDevice {
-    // Placeholder for battery monitoring
-    // Actual implementation uses WatchKit framework
-    func isBatteryMonitoringEnabled(_ enabled: Bool) {
-        // Implementation provided by WatchKit
-    }
-
-    func batteryLevel() -> Float {
-        // Implementation provided by WatchKit
-        return 1.0
-    }
+    // Battery monitoring is built into WKInterfaceDevice
+    // This extension is just for documentation
 }
+
+#endif

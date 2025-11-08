@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "PetTrackerPackage",
     platforms: [
-        .iOS(.v18),      // Will be updated to iOS 26 when creating Xcode project
-        .watchOS(.v11)   // Will be updated to watchOS 26 when creating Xcode project
+        .iOS(.v26),
+        .watchOS(.v26)
     ],
     products: [
         // Main feature module containing all app logic

@@ -243,7 +243,7 @@ public struct LocationFix: Codable, Equatable, Sendable, Identifiable {
 
     // MARK: - Custom Encoding/Decoding
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         id = try container.decode(UUID.self, forKey: .id)
@@ -268,7 +268,7 @@ public struct LocationFix: Codable, Equatable, Sendable, Identifiable {
         sequence = try container.decode(Int.self, forKey: .sequence)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(id, forKey: .id)

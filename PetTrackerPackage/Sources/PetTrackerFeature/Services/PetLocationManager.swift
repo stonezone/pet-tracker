@@ -1,6 +1,7 @@
 import Foundation
+#if os(iOS)
 import CoreLocation
-import WatchConnectivity
+@preconcurrency import WatchConnectivity
 import Observation
 
 /// Manages pet location tracking by receiving GPS data from Apple Watch
@@ -78,7 +79,7 @@ public final class PetLocationManager: NSObject {
     public private(set) var isSessionActivated: Bool = false
 
     /// Last error encountered
-    public private(set) var lastError: Error?
+    public private(set) var lastError: (any Error)?
 
     /// Connection status message for UI display
     public var connectionStatus: String {
@@ -233,7 +234,7 @@ extension PetLocationManager: CLLocationManagerDelegate {
 
     nonisolated public func locationManager(
         _ manager: CLLocationManager,
-        didFailWithError error: Error
+        didFailWithError error: any Error
     ) {
         Task { @MainActor in
             self.lastError = error
@@ -246,7 +247,7 @@ extension PetLocationManager: CLLocationManagerDelegate {
         Task { @MainActor in
             switch status {
             case .authorizedWhenInUse, .authorizedAlways:
-                manager.startUpdatingLocation()
+                self.locationManager.startUpdatingLocation()
             case .denied, .restricted:
                 self.lastError = LocationError.permissionDenied
             default:
@@ -263,16 +264,18 @@ extension PetLocationManager: WCSessionDelegate {
     nonisolated public func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
-        error: Error?
+        error: (any Error)?
     ) {
+        let isActivated = (activationState == .activated)
         Task { @MainActor in
-            self.isSessionActivated = (activationState == .activated)
+            self.isSessionActivated = isActivated
             if let error = error {
                 self.lastError = error
             }
         }
     }
 
+    #if os(iOS)
     nonisolated public func sessionDidBecomeInactive(_ session: WCSession) {
         Task { @MainActor in
             self.isSessionActivated = false
@@ -285,6 +288,7 @@ extension PetLocationManager: WCSessionDelegate {
         }
         session.activate()
     }
+    #endif
 
     nonisolated public func sessionReachabilityDidChange(_ session: WCSession) {
         Task { @MainActor in
@@ -338,7 +342,7 @@ extension PetLocationManager: WCSessionDelegate {
     }
 
     /// Common handler for all message types
-    private func handleReceivedMessage(_ message: [String: Any]) {
+    nonisolated private func handleReceivedMessage(_ message: [String: Any]) {
         do {
             // Convert dictionary to JSON data
             let jsonData = try JSONSerialization.data(withJSONObject: message)
@@ -357,3 +361,5 @@ extension PetLocationManager: WCSessionDelegate {
         }
     }
 }
+
+#endif
