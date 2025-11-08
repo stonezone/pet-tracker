@@ -22,8 +22,6 @@
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>com.pettracker.PetTracker</string>
-	<key>WKExtensionDelegateClassName</key>
-	<string>$(PRODUCT_MODULE_NAME).ExtensionDelegate</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PetTracker needs location access to track your pet's GPS position.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

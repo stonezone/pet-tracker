@@ -267,10 +267,13 @@ extension PetLocationManager: WCSessionDelegate {
         error: (any Error)?
     ) {
         let isActivated = (activationState == .activated)
+        print("PetLocationManager: Session activated with state: \(activationState.rawValue), reachable: \(session.isReachable)")
         Task { @MainActor in
             self.isSessionActivated = isActivated
+            self.isWatchReachable = session.isReachable
             if let error = error {
                 self.lastError = error
+                print("PetLocationManager: Session activation error: \(error)")
             }
         }
     }
@@ -291,6 +294,7 @@ extension PetLocationManager: WCSessionDelegate {
     #endif
 
     nonisolated public func sessionReachabilityDidChange(_ session: WCSession) {
+        print("PetLocationManager: Reachability changed to: \(session.isReachable)")
         Task { @MainActor in
             self.isWatchReachable = session.isReachable
         }
@@ -350,11 +354,14 @@ extension PetLocationManager: WCSessionDelegate {
             // Decode LocationFix
             let fix = try JSONDecoder().decode(LocationFix.self, from: jsonData)
 
+            print("PetLocationManager: Received location fix #\(fix.sequence)")
+
             // Update on main thread
             Task { @MainActor in
                 self.handleReceivedLocationFix(fix)
             }
         } catch {
+            print("PetLocationManager: Error decoding location fix: \(error)")
             Task { @MainActor in
                 self.lastError = error
             }

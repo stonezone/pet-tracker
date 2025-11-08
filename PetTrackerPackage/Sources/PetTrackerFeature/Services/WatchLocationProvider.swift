@@ -274,7 +274,8 @@ public final class WatchLocationProvider: NSObject {
 
         do {
             let jsonData = try JSONEncoder().encode(fix)
-            guard let dict = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            guard let dict = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                  !dict.isEmpty else {
                 return
             }
 
@@ -284,6 +285,7 @@ public final class WatchLocationProvider: NSObject {
 
         } catch {
             lastError = error
+            print("WatchLocationProvider: Error sending application context: \(error)")
         }
     }
 
@@ -294,7 +296,8 @@ public final class WatchLocationProvider: NSObject {
 
         do {
             let jsonData = try JSONEncoder().encode(fix)
-            guard let dict = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            guard let dict = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                  !dict.isEmpty else {
                 return
             }
 
@@ -302,12 +305,14 @@ public final class WatchLocationProvider: NSObject {
                 // Fall back to file transfer on failure
                 Task { @MainActor in
                     self.lastError = error
+                    print("WatchLocationProvider: Interactive message failed: \(error)")
                     self.sendViaFileTransfer(fix)
                 }
             }
 
         } catch {
             lastError = error
+            print("WatchLocationProvider: Error encoding interactive message: \(error)")
         }
     }
 
@@ -409,10 +414,12 @@ extension WatchLocationProvider: WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: (any Error)?
     ) {
+        print("WatchLocationProvider: Session activated with state: \(activationState.rawValue), reachable: \(session.isReachable)")
         Task { @MainActor in
             self.isPhoneReachable = session.isReachable
             if let error = error {
                 self.lastError = error
+                print("WatchLocationProvider: Session activation error: \(error)")
             }
         }
     }
