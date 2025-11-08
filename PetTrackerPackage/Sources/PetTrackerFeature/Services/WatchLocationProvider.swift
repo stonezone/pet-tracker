@@ -70,6 +70,21 @@ public final class WatchLocationProvider: NSObject {
     /// Accuracy change threshold to bypass throttle (meters)
     private let accuracyBypassThreshold: Double = 5.0
 
+    /// Performance monitor for battery and metrics tracking
+    private let performanceMonitor = PerformanceMonitor.shared
+
+    /// Last known location (for motion detection)
+    private var lastKnownLocation: CLLocation?
+
+    /// Distance threshold to consider device stationary (meters)
+    private let stationaryThresholdMeters: Double = 5.0
+
+    /// Time threshold to confirm stationary state (seconds)
+    private let stationaryTimeThreshold: TimeInterval = 30.0
+
+    /// Timestamp of last significant movement
+    private var lastMovementTime: Date = Date()
+
     // MARK: - Initialization
 
     public override init() {
@@ -124,6 +139,13 @@ public final class WatchLocationProvider: NSObject {
     private func updateBatteryLevel() {
         let device = WKInterfaceDevice.current()
         batteryLevel = Double(device.batteryLevel)
+
+        // Log battery warnings
+        if batteryLevel <= 0.10 {
+            Logger.performance.warning("Critical battery: \(Int(self.batteryLevel * 100))% - Consider stopping tracking")
+        } else if batteryLevel <= 0.20 {
+            Logger.performance.warning("Low battery: \(Int(self.batteryLevel * 100))% - Reducing GPS frequency")
+        }
     }
 
     // MARK: - Public API
@@ -262,13 +284,25 @@ public final class WatchLocationProvider: NSObject {
 
     // MARK: - Triple-Path Messaging
 
-    /// Sends location via all three delivery paths
+    /// Sends location via all three delivery paths with adaptive throttling
     private func sendLocation(_ location: CLLocation) {
         // Don't send if session not activated
         guard session.activationState == .activated else {
             Logger.connectivity.warning("Skipping send - session not activated (state: \(self.session.activationState.rawValue))")
             return
         }
+
+        // Check if device is stationary for battery optimization
+        let isStationary = isDeviceStationary(location)
+
+        // Apply adaptive throttling based on battery and motion
+        if shouldThrottleUpdate(location: location, isStationary: isStationary) {
+            Logger.connectivity.debug("Throttling update - stationary: \(isStationary), battery: \(Int(self.batteryLevel * 100))%")
+            return
+        }
+
+        // Update last known location for motion detection
+        lastKnownLocation = location
 
         sequenceNumber += 1
 
@@ -283,7 +317,11 @@ public final class WatchLocationProvider: NSObject {
         latestLocation = fix
         fixesSent += 1
 
-        Logger.connectivity.debug("Sending location fix #\(self.sequenceNumber), reachable: \(self.session.isReachable)")
+        // Record GPS latency (timestamp to now)
+        let gpsLatency = Date().timeIntervalSince(location.timestamp)
+        performanceMonitor.recordGPSLatency(gpsLatency)
+
+        Logger.connectivity.debug("Sending location fix #\(self.sequenceNumber), reachable: \(self.session.isReachable), battery: \(Int(self.batteryLevel * 100))%")
 
         // Path 1: Application Context (throttled, background)
         sendViaApplicationContext(fix)
@@ -298,6 +336,73 @@ public final class WatchLocationProvider: NSObject {
         if !session.isReachable {
             sendViaFileTransfer(fix)
         }
+    }
+
+    /// Determines if device is stationary (not moving significantly)
+    ///
+    /// - Parameter location: Current location
+    /// - Returns: True if device hasn't moved significantly in the last 30 seconds
+    private func isDeviceStationary(_ location: CLLocation) -> Bool {
+        guard let lastLocation = lastKnownLocation else {
+            return false // No previous location, assume moving
+        }
+
+        let distance = location.distance(from: lastLocation)
+
+        // Check if moved less than threshold
+        if distance < stationaryThresholdMeters {
+            // Check if been stationary for minimum time
+            let timeSinceLastMovement = Date().timeIntervalSince(lastMovementTime)
+            return timeSinceLastMovement > stationaryTimeThreshold
+        } else {
+            // Significant movement detected
+            lastMovementTime = Date()
+            return false
+        }
+    }
+
+    /// Determines if update should be throttled based on battery and motion
+    ///
+    /// Strategy:
+    /// - Normal battery (>20%): Standard throttling (0.5s)
+    /// - Low battery (10-20%): Reduce frequency when stationary (2.0s)
+    /// - Critical battery (<10%): Aggressive throttling (5.0s)
+    ///
+    /// - Parameters:
+    ///   - location: Current location
+    ///   - isStationary: Whether device is stationary
+    /// - Returns: True if update should be throttled
+    private func shouldThrottleUpdate(location: CLLocation, isStationary: Bool) -> Bool {
+        let now = Date()
+        let timeSinceLastUpdate = now.timeIntervalSince(lastContextUpdate)
+
+        // Determine throttle interval based on battery and motion
+        let throttleInterval: TimeInterval
+
+        if batteryLevel <= 0.10 {
+            // Critical battery: Aggressive throttling (5s)
+            throttleInterval = 5.0
+            Logger.performance.debug("Critical battery mode: 5s throttle")
+        } else if batteryLevel <= 0.20 {
+            // Low battery: Reduce frequency when stationary (2s), normal when moving (0.5s)
+            throttleInterval = isStationary ? 2.0 : 1.0
+            Logger.performance.debug("Low battery mode: \(throttleInterval)s throttle (stationary: \(isStationary))")
+        } else {
+            // Normal battery: Standard throttling (0.5s)
+            throttleInterval = contextThrottleInterval
+        }
+
+        // Check if enough time has passed
+        let shouldThrottle = timeSinceLastUpdate < throttleInterval
+
+        // Always send if accuracy changed significantly (bypass throttle)
+        let accuracyChange = abs(location.horizontalAccuracy - lastAccuracy)
+        if accuracyChange > accuracyBypassThreshold {
+            Logger.connectivity.debug("Accuracy changed \(Int(accuracyChange))m - bypassing throttle")
+            return false
+        }
+
+        return shouldThrottle
     }
 
     /// Path 1: Application Context (0.5s throttle with accuracy bypass)
