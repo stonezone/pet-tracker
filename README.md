@@ -180,12 +180,28 @@ git commit -m "test: add PetLocationManager tests"
 
 ## Documentation
 
-### Project Docs
+### API Documentation
+
+- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) - Complete API reference for all public interfaces
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Architecture diagrams and design decisions
+- [`docs/INTEGRATION_GUIDE.md`](docs/INTEGRATION_GUIDE.md) - Step-by-step integration instructions
+- [`docs/MIGRATION_GUIDE.md`](docs/MIGRATION_GUIDE.md) - Version migration and compatibility guide
+
+### Code Examples
+
+- [`docs/examples/BasicUsage.swift`](docs/examples/BasicUsage.swift) - Complete iOS app example
+- [`docs/examples/ErrorHandling.swift`](docs/examples/ErrorHandling.swift) - Error handling with retry logic
+- [`docs/examples/WatchApp.swift`](docs/examples/WatchApp.swift) - Complete Watch app example
+
+### Project Documentation
 
 - [`CLAUDE.md`](CLAUDE.md) - Comprehensive development guidelines
 - [`PROJECT_CHECKLIST.md`](PROJECT_CHECKLIST.md) - Quality gates and setup status
 - [`pet-tracker.md`](pet-tracker.md) - Original specification
-- [`docs/architecture/`](docs/architecture/) - Architecture decisions (pending)
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) - Contribution workflow and CI/CD
+- [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) - User documentation and setup guide
+- [`docs/APP_STORE_ASSETS.md`](docs/APP_STORE_ASSETS.md) - App Store submission assets
+- [`docs/PRIVACY_POLICY.md`](docs/PRIVACY_POLICY.md) - Privacy policy (no data collection)
 
 ### External Resources
 
@@ -225,6 +241,16 @@ git commit -m "test: add PetLocationManager tests"
 - [ ] Battery alerts
 - [ ] Location export (GPX format)
 - [ ] Multi-pet support
+
+### 📱 App Store Preparation
+
+- [x] App Store text content (name, description, keywords)
+- [x] Privacy policy (no data collection)
+- [x] Review notes for Apple
+- [x] Screenshot requirements documented
+- [ ] Screenshots captured (requires physical devices)
+- [ ] App preview video produced (optional)
+- [ ] App Store submission
 
 ---
 
