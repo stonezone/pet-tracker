@@ -131,6 +131,21 @@ public final class WatchLocationProvider: NSObject {
     public func startTracking() async {
         guard !isTracking else { return }
 
+        print("WatchLocationProvider: Starting tracking...")
+
+        // Wait for WCSession to activate if needed
+        if session.activationState != .activated {
+            print("WatchLocationProvider: Waiting for WCSession activation...")
+            // Give session a moment to activate
+            try? await Task.sleep(for: .seconds(1))
+
+            if session.activationState != .activated {
+                lastError = WatchConnectivityError.sessionNotActivated
+                print("WatchLocationProvider: Session not activated after delay")
+                return
+            }
+        }
+
         // Request location permission if needed
         let status = locationManager.authorizationStatus
 
@@ -152,21 +167,31 @@ public final class WatchLocationProvider: NSObject {
             try await startWorkoutSession()
         } catch {
             lastError = error
+            print("WatchLocationProvider: Failed to start workout: \(error)")
             return
         }
 
         // Start location updates
         locationManager.startUpdatingLocation()
         isTracking = true
+        print("WatchLocationProvider: Tracking started successfully")
     }
 
     /// Stops GPS tracking and ends workout session
     public func stopTracking() async {
-        guard isTracking else { return }
+        guard isTracking else {
+            print("WatchLocationProvider: Not tracking, nothing to stop")
+            return
+        }
+
+        print("WatchLocationProvider: Stopping tracking...")
+        isTracking = false // Set immediately so UI updates
 
         locationManager.stopUpdatingLocation()
+        print("WatchLocationProvider: Location updates stopped")
+
         await stopWorkoutSession()
-        isTracking = false
+        print("WatchLocationProvider: Stop tracking complete")
     }
 
     // MARK: - HealthKit Workout Session
@@ -208,27 +233,42 @@ public final class WatchLocationProvider: NSObject {
     private func stopWorkoutSession() async {
         guard let session = workoutSession,
               let builder = workoutBuilder else {
+            print("WatchLocationProvider: No workout session to stop")
             return
         }
 
+        print("WatchLocationProvider: Stopping workout session...")
+
         // End the workout
         session.end()
+        print("WatchLocationProvider: Workout session ended")
 
         do {
+            print("WatchLocationProvider: Ending collection...")
             try await builder.endCollection(at: Date())
+            print("WatchLocationProvider: Finishing workout...")
             _ = try await builder.finishWorkout()
+            print("WatchLocationProvider: Workout finished")
         } catch {
+            print("WatchLocationProvider: Error stopping workout: \(error)")
             lastError = error
         }
 
         workoutSession = nil
         workoutBuilder = nil
+        print("WatchLocationProvider: Workout cleanup complete")
     }
 
     // MARK: - Triple-Path Messaging
 
     /// Sends location via all three delivery paths
     private func sendLocation(_ location: CLLocation) {
+        // Don't send if session not activated
+        guard session.activationState == .activated else {
+            print("WatchLocationProvider: Skipping send - session not activated (state: \(session.activationState.rawValue))")
+            return
+        }
+
         sequenceNumber += 1
 
         // Create LocationFix
@@ -241,6 +281,8 @@ public final class WatchLocationProvider: NSObject {
 
         latestLocation = fix
         fixesSent += 1
+
+        print("WatchLocationProvider: Sending location fix #\(sequenceNumber), reachable: \(session.isReachable)")
 
         // Path 1: Application Context (throttled, background)
         sendViaApplicationContext(fix)

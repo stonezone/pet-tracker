@@ -74,7 +74,7 @@ struct WatchContentView: View {
 
             // Start/Stop Button
             Button {
-                Task {
+                Task { @MainActor in
                     if locationProvider.isTracking {
                         await locationProvider.stopTracking()
                     } else {
