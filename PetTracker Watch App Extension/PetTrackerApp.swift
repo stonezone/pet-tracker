@@ -1,4 +1,6 @@
 import SwiftUI
+
+#if os(watchOS)
 import PetTrackerFeature
 
 /// Main entry point for PetTracker Watch app
@@ -18,3 +20,4 @@ struct PetTracker_Watch_App: App {
         }
     }
 }
+#endif

@@ -1,4 +1,6 @@
 import SwiftUI
+
+#if os(watchOS)
 import PetTrackerFeature
 
 /// Main content view for PetTracker Watch app
@@ -116,3 +118,5 @@ struct WatchContentView: View {
     WatchContentView()
         .environment(WatchLocationProvider())
 }
+
+#endif
