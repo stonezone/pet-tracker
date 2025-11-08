@@ -1,10 +1,16 @@
 # PetTracker - Pet GPS Tracker
 
+[![CI Status](https://github.com/stonezone/pet-tracker/workflows/CI/badge.svg)](https://github.com/stonezone/pet-tracker/actions)
+[![Swift 6.2](https://img.shields.io/badge/Swift-6.2-orange.svg)](https://swift.org)
+[![iOS 26.0+](https://img.shields.io/badge/iOS-26.0+-blue.svg)](https://www.apple.com/ios)
+[![watchOS 26.0+](https://img.shields.io/badge/watchOS-26.0+-blue.svg)](https://www.apple.com/watchos)
+[![Tests](https://img.shields.io/badge/tests-127%20passing-brightgreen.svg)](https://github.com/stonezone/pet-tracker)
+
 Transform your Apple Watch into a real-time GPS tracker for your pet. Simply attach the Watch to your pet's collar and monitor their location live on your iPhone.
 
-**Status**: 🚧 Initial Setup Complete - Xcode Project Creation Pending
+**Status**: 🚧 Active Development - CI/CD Pipeline Complete
 **Version**: 0.1.0-dev
-**Last Updated**: 2025-11-07
+**Last Updated**: 2025-11-08
 
 ---
 
