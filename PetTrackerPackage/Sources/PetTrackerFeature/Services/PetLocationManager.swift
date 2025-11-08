@@ -105,11 +105,17 @@ public final class PetLocationManager: NSObject {
     // MARK: - Initialization
 
     /// Creates a new pet location manager
-    public override init() {
+    /// - Parameters:
+    ///   - locationManager: Location manager instance (defaults to new CLLocationManager for production)
+    ///   - session: WatchConnectivity session (defaults to WCSession.default for production)
+    public init(
+        locationManager: CLLocationManager = CLLocationManager(),
+        session: WCSession = WCSession.default
+    ) {
         Logger.iOSLocation.info("Initializing PetLocationManager")
 
-        self.locationManager = CLLocationManager()
-        self.session = WCSession.default
+        self.locationManager = locationManager
+        self.session = session
 
         super.init()
 

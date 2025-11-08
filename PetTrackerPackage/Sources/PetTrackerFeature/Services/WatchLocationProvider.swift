@@ -266,7 +266,7 @@ public final class WatchLocationProvider: NSObject {
     private func sendLocation(_ location: CLLocation) {
         // Don't send if session not activated
         guard session.activationState == .activated else {
-            Logger.connectivity.warning("Skipping send - session not activated (state: \(session.activationState.rawValue))")
+            Logger.connectivity.warning("Skipping send - session not activated (state: \(self.session.activationState.rawValue))")
             return
         }
 
@@ -283,7 +283,7 @@ public final class WatchLocationProvider: NSObject {
         latestLocation = fix
         fixesSent += 1
 
-        Logger.connectivity.debug("Sending location fix #\(sequenceNumber), reachable: \(session.isReachable)")
+        Logger.connectivity.debug("Sending location fix #\(self.sequenceNumber), reachable: \(self.session.isReachable)")
 
         // Path 1: Application Context (throttled, background)
         sendViaApplicationContext(fix)
