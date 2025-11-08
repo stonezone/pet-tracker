@@ -1,5 +1,6 @@
 import SwiftUI
 import PetTrackerFeature
+import OSLog
 
 /// Main entry point for PetTracker iOS app
 ///
@@ -12,10 +13,10 @@ struct PetTrackerApp: App {
     @State private var locationManager: PetLocationManager
 
     init() {
-        print("PetTrackerApp: iOS app starting...")
+        Logger.ui.info("iOS app starting")
         let manager = PetLocationManager()
         _locationManager = State(initialValue: manager)
-        print("PetTrackerApp: iOS app initialized")
+        Logger.ui.info("iOS app initialized")
     }
 
     var body: some Scene {

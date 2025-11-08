@@ -3,6 +3,7 @@ import Foundation
 import CoreLocation
 @preconcurrency import WatchConnectivity
 import Observation
+import OSLog
 
 /// Manages pet location tracking by receiving GPS data from Apple Watch
 ///
@@ -105,20 +106,20 @@ public final class PetLocationManager: NSObject {
 
     /// Creates a new pet location manager
     public override init() {
-        print("PetLocationManager: Initializing...")
+        Logger.iOSLocation.info("Initializing PetLocationManager")
 
         self.locationManager = CLLocationManager()
         self.session = WCSession.default
 
         super.init()
 
-        print("PetLocationManager: Setting up location manager...")
+        Logger.iOSLocation.debug("Setting up location manager")
         setupLocationManager()
 
-        print("PetLocationManager: Setting up WatchConnectivity...")
+        Logger.connectivity.debug("Setting up WatchConnectivity")
         setupWatchConnectivity()
 
-        print("PetLocationManager: Initialization complete")
+        Logger.iOSLocation.info("PetLocationManager initialization complete")
     }
 
     // MARK: - Setup
@@ -145,42 +146,42 @@ public final class PetLocationManager: NSObject {
 
     /// Starts tracking both pet (via Watch) and owner (via iPhone GPS)
     public func startTracking() async {
-        print("PetLocationManager: Starting tracking...")
+        Logger.iOSLocation.info("Starting tracking")
 
         // Wait for WCSession to activate if needed
         if session.activationState != .activated {
-            print("PetLocationManager: Waiting for WCSession activation...")
+            Logger.connectivity.debug("Waiting for WCSession activation")
             // Give session a moment to activate
             try? await Task.sleep(for: .seconds(1))
 
             if session.activationState != .activated {
                 lastError = WatchConnectivityError.sessionNotActivated
-                print("PetLocationManager: Session not activated after delay (state: \(session.activationState.rawValue))")
+                Logger.connectivity.error("Session not activated after delay", metadata: ["state": "\(session.activationState.rawValue)"])
                 return
             }
         }
 
-        print("PetLocationManager: Session is activated")
+        Logger.connectivity.info("WCSession is activated")
 
         // Request location permissions if needed
         let status = locationManager.authorizationStatus
 
         switch status {
         case .notDetermined:
-            print("PetLocationManager: Requesting location authorization...")
+            Logger.iOSLocation.info("Requesting location authorization")
             locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            print("PetLocationManager: Location permission denied")
+            Logger.iOSLocation.error("Location permission denied")
             lastError = LocationError.permissionDenied
             return
         case .authorizedWhenInUse, .authorizedAlways:
-            print("PetLocationManager: Starting location updates...")
+            Logger.iOSLocation.info("Starting location updates")
             locationManager.startUpdatingLocation()
         @unknown default:
             break
         }
 
-        print("PetLocationManager: Tracking started successfully")
+        Logger.iOSLocation.info("Tracking started successfully")
     }
 
     /// Stops tracking
@@ -289,13 +290,16 @@ extension PetLocationManager: WCSessionDelegate {
         error: (any Error)?
     ) {
         let isActivated = (activationState == .activated)
-        print("PetLocationManager: Session activated with state: \(activationState.rawValue), reachable: \(session.isReachable)")
+        Logger.connectivity.info("Session activation complete", metadata: [
+            "state": "\(activationState.rawValue)",
+            "reachable": "\(session.isReachable)"
+        ])
         Task { @MainActor in
             self.isSessionActivated = isActivated
             self.isWatchReachable = session.isReachable
             if let error = error {
                 self.lastError = error
-                print("PetLocationManager: Session activation error: \(error)")
+                Logger.connectivity.error("Session activation failed", metadata: ["error": "\(error.localizedDescription)"])
             }
         }
     }
@@ -316,7 +320,7 @@ extension PetLocationManager: WCSessionDelegate {
     #endif
 
     nonisolated public func sessionReachabilityDidChange(_ session: WCSession) {
-        print("PetLocationManager: Reachability changed to: \(session.isReachable)")
+        Logger.connectivity.info("Reachability changed", metadata: ["isReachable": "\(session.isReachable)"])
         Task { @MainActor in
             self.isWatchReachable = session.isReachable
         }
@@ -329,7 +333,7 @@ extension PetLocationManager: WCSessionDelegate {
         _ session: WCSession,
         didReceiveMessage message: [String: Any]
     ) {
-        print("PetLocationManager: Received interactive message (no reply handler)")
+        Logger.connectivity.debug("Received interactive message (no reply handler)")
         handleReceivedMessage(message)
     }
 
@@ -339,7 +343,7 @@ extension PetLocationManager: WCSessionDelegate {
         didReceiveMessage message: [String: Any],
         replyHandler: @escaping ([String: Any]) -> Void
     ) {
-        print("PetLocationManager: Received interactive message (with reply handler)")
+        Logger.connectivity.debug("Received interactive message (with reply handler)")
         handleReceivedMessage(message)
         replyHandler(["status": "received"])
     }
@@ -349,7 +353,7 @@ extension PetLocationManager: WCSessionDelegate {
         _ session: WCSession,
         didReceiveApplicationContext applicationContext: [String: Any]
     ) {
-        print("PetLocationManager: Received application context")
+        Logger.connectivity.debug("Received application context")
         handleReceivedMessage(applicationContext)
     }
 
@@ -379,14 +383,14 @@ extension PetLocationManager: WCSessionDelegate {
             // Decode LocationFix
             let fix = try JSONDecoder().decode(LocationFix.self, from: jsonData)
 
-            print("PetLocationManager: Received location fix #\(fix.sequence)")
+            Logger.connectivity.debug("Received location fix", metadata: ["sequence": "\(fix.sequence)"])
 
             // Update on main thread
             Task { @MainActor in
                 self.handleReceivedLocationFix(fix)
             }
         } catch {
-            print("PetLocationManager: Error decoding location fix: \(error)")
+            Logger.connectivity.error("Failed to decode location fix", metadata: ["error": "\(error.localizedDescription)"])
             Task { @MainActor in
                 self.lastError = error
             }

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 #if os(watchOS)
 import CoreLocation
 @preconcurrency import WatchConnectivity
@@ -131,17 +132,17 @@ public final class WatchLocationProvider: NSObject {
     public func startTracking() async {
         guard !isTracking else { return }
 
-        print("WatchLocationProvider: Starting tracking...")
+        Logger.watchLocation.info("Starting tracking")
 
         // Wait for WCSession to activate if needed
         if session.activationState != .activated {
-            print("WatchLocationProvider: Waiting for WCSession activation...")
+            Logger.connectivity.info("Waiting for WCSession activation")
             // Give session a moment to activate
             try? await Task.sleep(for: .seconds(1))
 
             if session.activationState != .activated {
                 lastError = WatchConnectivityError.sessionNotActivated
-                print("WatchLocationProvider: Session not activated after delay")
+                Logger.connectivity.error("Session not activated after delay")
                 return
             }
         }
@@ -167,31 +168,31 @@ public final class WatchLocationProvider: NSObject {
             try await startWorkoutSession()
         } catch {
             lastError = error
-            print("WatchLocationProvider: Failed to start workout: \(error)")
+            Logger.healthKit.error("Failed to start workout: \(error.localizedDescription)")
             return
         }
 
         // Start location updates
         locationManager.startUpdatingLocation()
         isTracking = true
-        print("WatchLocationProvider: Tracking started successfully")
+        Logger.watchLocation.info("Tracking started successfully")
     }
 
     /// Stops GPS tracking and ends workout session
     public func stopTracking() async {
         guard isTracking else {
-            print("WatchLocationProvider: Not tracking, nothing to stop")
+            Logger.watchLocation.debug("Not tracking, nothing to stop")
             return
         }
 
-        print("WatchLocationProvider: Stopping tracking...")
+        Logger.watchLocation.info("Stopping tracking")
         isTracking = false // Set immediately so UI updates
 
         locationManager.stopUpdatingLocation()
-        print("WatchLocationProvider: Location updates stopped")
+        Logger.watchLocation.debug("Location updates stopped")
 
         await stopWorkoutSession()
-        print("WatchLocationProvider: Stop tracking complete")
+        Logger.watchLocation.info("Stop tracking complete")
     }
 
     // MARK: - HealthKit Workout Session
@@ -233,30 +234,30 @@ public final class WatchLocationProvider: NSObject {
     private func stopWorkoutSession() async {
         guard let session = workoutSession,
               let builder = workoutBuilder else {
-            print("WatchLocationProvider: No workout session to stop")
+            Logger.healthKit.debug("No workout session to stop")
             return
         }
 
-        print("WatchLocationProvider: Stopping workout session...")
+        Logger.healthKit.info("Stopping workout session")
 
         // End the workout
         session.end()
-        print("WatchLocationProvider: Workout session ended")
+        Logger.healthKit.debug("Workout session ended")
 
         do {
-            print("WatchLocationProvider: Ending collection...")
+            Logger.healthKit.debug("Ending collection")
             try await builder.endCollection(at: Date())
-            print("WatchLocationProvider: Finishing workout...")
+            Logger.healthKit.debug("Finishing workout")
             _ = try await builder.finishWorkout()
-            print("WatchLocationProvider: Workout finished")
+            Logger.healthKit.info("Workout finished")
         } catch {
-            print("WatchLocationProvider: Error stopping workout: \(error)")
+            Logger.healthKit.error("Error stopping workout: \(error.localizedDescription)")
             lastError = error
         }
 
         workoutSession = nil
         workoutBuilder = nil
-        print("WatchLocationProvider: Workout cleanup complete")
+        Logger.healthKit.debug("Workout cleanup complete")
     }
 
     // MARK: - Triple-Path Messaging
@@ -265,7 +266,7 @@ public final class WatchLocationProvider: NSObject {
     private func sendLocation(_ location: CLLocation) {
         // Don't send if session not activated
         guard session.activationState == .activated else {
-            print("WatchLocationProvider: Skipping send - session not activated (state: \(session.activationState.rawValue))")
+            Logger.connectivity.warning("Skipping send - session not activated (state: \(session.activationState.rawValue))")
             return
         }
 
@@ -282,7 +283,7 @@ public final class WatchLocationProvider: NSObject {
         latestLocation = fix
         fixesSent += 1
 
-        print("WatchLocationProvider: Sending location fix #\(sequenceNumber), reachable: \(session.isReachable)")
+        Logger.connectivity.debug("Sending location fix #\(sequenceNumber), reachable: \(session.isReachable)")
 
         // Path 1: Application Context (throttled, background)
         sendViaApplicationContext(fix)
@@ -327,7 +328,7 @@ public final class WatchLocationProvider: NSObject {
 
         } catch {
             lastError = error
-            print("WatchLocationProvider: Error sending application context: \(error)")
+            Logger.connectivity.error("Error sending application context: \(error.localizedDescription)")
         }
     }
 
@@ -347,14 +348,14 @@ public final class WatchLocationProvider: NSObject {
                 // Fall back to file transfer on failure
                 Task { @MainActor in
                     self.lastError = error
-                    print("WatchLocationProvider: Interactive message failed: \(error)")
+                    Logger.connectivity.error("Interactive message failed: \(error.localizedDescription)")
                     self.sendViaFileTransfer(fix)
                 }
             }
 
         } catch {
             lastError = error
-            print("WatchLocationProvider: Error encoding interactive message: \(error)")
+            Logger.connectivity.error("Error encoding interactive message: \(error.localizedDescription)")
         }
     }
 
@@ -456,12 +457,12 @@ extension WatchLocationProvider: WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: (any Error)?
     ) {
-        print("WatchLocationProvider: Session activated with state: \(activationState.rawValue), reachable: \(session.isReachable)")
+        Logger.connectivity.info("Session activated with state: \(activationState.rawValue), reachable: \(session.isReachable)")
         Task { @MainActor in
             self.isPhoneReachable = session.isReachable
             if let error = error {
                 self.lastError = error
-                print("WatchLocationProvider: Session activation error: \(error)")
+                Logger.connectivity.error("Session activation error: \(error.localizedDescription)")
             }
         }
     }

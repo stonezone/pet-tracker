@@ -1,5 +1,6 @@
 import SwiftUI
 import PetTrackerFeature
+import OSLog
 
 /// Main content view for PetTracker iOS app
 ///
@@ -14,7 +15,7 @@ struct ContentView: View {
     @Environment(PetLocationManager.self) private var locationManager
 
     init() {
-        print("ContentView: Initializing...")
+        Logger.ui.debug("ContentView initializing")
     }
 
     var body: some View {
@@ -136,11 +137,11 @@ struct ContentView: View {
                 }
             }
             .onAppear {
-                print("ContentView: onAppear called")
+                Logger.ui.debug("ContentView appeared")
                 Task {
-                    print("ContentView: Starting location tracking task...")
+                    Logger.ui.debug("ContentView starting location tracking task")
                     await locationManager.startTracking()
-                    print("ContentView: Location tracking task completed")
+                    Logger.ui.debug("ContentView location tracking task completed")
                 }
             }
         }
