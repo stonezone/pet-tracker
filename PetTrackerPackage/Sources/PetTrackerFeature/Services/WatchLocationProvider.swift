@@ -2,7 +2,7 @@ import Foundation
 #if os(watchOS)
 import CoreLocation
 @preconcurrency import WatchConnectivity
-import HealthKit
+@preconcurrency import HealthKit
 import WatchKit
 import Observation
 
@@ -259,6 +259,9 @@ public final class WatchLocationProvider: NSObject {
 
     /// Path 1: Application Context (0.5s throttle with accuracy bypass)
     private func sendViaApplicationContext(_ fix: LocationFix) {
+        // Don't send if session not activated
+        guard session.activationState == .activated else { return }
+
         let now = Date()
         let timeSinceLastUpdate = now.timeIntervalSince(lastContextUpdate)
         let accuracyChange = abs(fix.horizontalAccuracyMeters - lastAccuracy)
@@ -286,7 +289,8 @@ public final class WatchLocationProvider: NSObject {
 
     /// Path 2: Interactive Messages (immediate, requires reachability)
     private func sendViaInteractiveMessage(_ fix: LocationFix) {
-        guard session.isReachable else { return }
+        guard session.activationState == .activated,
+              session.isReachable else { return }
 
         do {
             let jsonData = try JSONEncoder().encode(fix)
@@ -309,6 +313,9 @@ public final class WatchLocationProvider: NSObject {
 
     /// Path 3: File Transfer (guaranteed delivery with retry)
     private func sendViaFileTransfer(_ fix: LocationFix) {
+        // Don't send if session not activated
+        guard session.activationState == .activated else { return }
+
         do {
             let jsonData = try JSONEncoder().encode(fix)
 
