@@ -9,10 +9,13 @@ import OSLog
 /// - Distance from owner to pet
 /// - Battery level
 /// - GPS accuracy
-/// - Connection status
+/// - Connection status with error handling
 struct ContentView: View {
 
     @Environment(PetLocationManager.self) private var locationManager
+
+    /// Current user-facing error to display
+    @State private var currentError: UserFacingError?
 
     init() {
         Logger.ui.debug("ContentView initializing")
@@ -22,17 +25,15 @@ struct ContentView: View {
         NavigationStack {
             VStack(spacing: 20) {
 
-                // Connection Status
-                HStack {
-                    Circle()
-                        .fill(locationManager.isWatchReachable ? Color.green : Color.red)
-                        .frame(width: 12, height: 12)
-
-                    Text(locationManager.connectionStatus)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                // Connection Status with retry capability
+                ConnectionStatusView(
+                    isActivated: locationManager.isSessionActivated,
+                    isReachable: locationManager.isWatchReachable,
+                    statusMessage: locationManager.connectionStatus
+                ) {
+                    await retryConnection()
                 }
-                .padding()
+                .padding(.horizontal)
 
                 if let location = locationManager.latestPetLocation {
 
@@ -136,18 +137,33 @@ struct ContentView: View {
                     }
                 }
             }
-            .onAppear {
-                Logger.ui.debug("ContentView appeared")
-                Task {
-                    Logger.ui.debug("ContentView starting location tracking task")
-                    await locationManager.startTracking()
-                    Logger.ui.debug("ContentView location tracking task completed")
+            .task {
+                Logger.ui.debug("ContentView starting location tracking task")
+                await locationManager.startTracking()
+                Logger.ui.debug("ContentView location tracking task completed")
+            }
+            .task(id: locationManager.lastError?.localizedDescription) {
+                // Map internal errors to user-facing errors when they change
+                if let error = locationManager.lastError {
+                    Logger.ui.warning("Error detected: \(error.localizedDescription)")
+                    currentError = UserFacingError.from(error)
                 }
+            }
+            .errorAlert(error: $currentError) {
+                // Retry action
+                await retryConnection()
             }
         }
     }
 
     // MARK: - Helper Methods
+
+    /// Retries connection by restarting tracking
+    private func retryConnection() async {
+        Logger.ui.info("Retrying connection...")
+        currentError = nil // Clear current error
+        await locationManager.startTracking()
+    }
 
     private func batteryIcon(for level: Int) -> String {
         switch level {

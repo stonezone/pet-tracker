@@ -258,7 +258,7 @@ public final class PetLocationManager: NSObject {
 
     // MARK: - Error Types
 
-    public enum LocationError: LocalizedError {
+    public enum LocationError: LocalizedError, Equatable {
         case permissionDenied
 
         public var errorDescription: String? {
@@ -269,7 +269,7 @@ public final class PetLocationManager: NSObject {
         }
     }
 
-    public enum WatchConnectivityError: LocalizedError {
+    public enum WatchConnectivityError: LocalizedError, Equatable {
         case notSupported
         case sessionNotActivated
         case activationTimeout
